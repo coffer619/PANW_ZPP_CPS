@@ -319,12 +319,51 @@ Both appear in Palo Alto's own documentation; neither holds on 11.2.7:
 
 SNMP is the only per-zone CPS source on this version.
 
-### Cloud and Panorama alternatives
+### Management-plane alternatives
 
-- **AIOps Threshold Recommendations** (PAN-OS 10.0+) is documented as the best
-  method — it recommends thresholds directly from telemetry. Requires cloud
-  connectivity, so it is unavailable on isolated networks.
-- **Panorama device monitoring** gives 90-day CPS trends if you run Panorama.
+**Neither Panorama nor Strata Cloud Manager exposes `panZoneTable`.** Their health
+monitoring is device-level — total CPS for the firewall, not split by zone or by
+protocol bucket. Per-zone CPS comes only from polling each firewall's own SNMP
+agent directly, which is why this toolkit exists.
+
+What they do give you:
+
+| Platform | What | Where |
+|---|---|---|
+| Panorama | Device-level CPS trends (~90 days) | Managed Devices → Health |
+| Panorama | Aggregated traffic logs, far longer retention than a firewall's local log partition | Monitor → Logs → Traffic |
+| Panorama | Zone Protection profiles | Template → Network → Network Profiles → Zone Protection |
+| Strata Cloud Manager | Zone Protection profiles and pushed config | Manage → Configuration → NGFW and Prisma Access |
+
+The log-based method in Step 4b ports to either: point the query at the collector
+instead of the firewall and you get the same per-second analysis over a longer
+window.
+
+If your firewall is cloud-managed, config changes must be made in the management
+plane — pushing them locally will be overwritten on the next push. Check which
+applies with `show panorama-status` and `show cloud-management-status`; config
+elements sourced from a template are marked `src="tpl"` in the API output.
+
+### AIOps Threshold Recommendations
+
+Palo Alto documents these as the best way to measure CPS on PAN-OS 10.0+. They
+recommend Alert / Activate / Maximum values for TCP (SYN), UDP, and Other IP
+straight from telemetry, and separately flag zones that have no Zone Protection
+profile at all.
+
+Two prerequisites — the second is the one that catches people out:
+
+1. **Outbound cloud connectivity with device telemetry enabled.** Verify with
+   `show cloud-management-status`, and confirm `device-health-performance` is on
+   under `deviceconfig/system/device-telemetry`. Note this needs only *outbound*
+   reachability from the management plane; a zone with no inbound exposure can
+   still be fully cloud-connected.
+2. **Premium AIOps.** ZPP threshold recommendations are a Premium-tier feature. A
+   connected firewall on the free tier will not receive them.
+
+If both hold, prefer the recommendations — they are derived from richer telemetry
+than anything you can sample externally. If either fails, this toolkit is the
+fallback.
 
 ---
 

@@ -110,6 +110,24 @@ cd PANW
 If you get `git: command not found`, install Git first from
 <https://git-scm.com/downloads>, then close and reopen your terminal and try again.
 
+This downloads the files into a folder named `PANW` inside whatever folder your
+terminal was in, and the `cd PANW` moves you into it. (`cd` means "change
+directory" — it is how you move between folders in a terminal.)
+
+> **Read this or you will get stuck later.** Every command in this guide must be
+> run *from inside that folder*. If you close the terminal and open a new one,
+> you land back in your home folder and commands will fail with "not
+> recognized" or "no such file." Run `cd PANW` again each time you open a new
+> terminal.
+>
+> Lost? Run `cd` with no arguments on Windows to see where you are (`pwd` on
+> macOS/Linux).
+
+> **Windows only — why commands start with `.\`** In PowerShell you must type
+> `.\Stats.ps1`, not `Stats.ps1`. The `.\` means "in this folder." Leaving it off
+> gives `The term 'Stats.ps1' is not recognized`. This is a PowerShell safety
+> feature, not a mistake in the guide.
+
 ## 2.3 Check what tools you have
 
 Run these three commands one at a time. You are just looking to see whether each
@@ -355,6 +373,19 @@ For a full week, change `-DurationSec 3600` to `-DurationSec 604800`.
 **Leave the terminal window open while it runs.** Closing it stops the collection.
 To stop early, press Ctrl+C.
 
+> **Planning a multi-day run?** The collection stops if the computer sleeps,
+> restarts, or drops off the network. Before starting a long run:
+>
+> - Set the machine to never sleep (Windows: Settings → System → Power & sleep;
+>   macOS: System Settings → Lock Screen; on a laptop, also set "when the lid is
+>   closed" to do nothing, or leave it open)
+> - Turn off automatic restarts for updates
+> - Use a wired connection if you can
+>
+> A partial run is still useful — a stopped collection keeps everything gathered
+> up to that point. If it dies overnight, just start it again; more data is
+> better, but three good days beat none.
+
 Results are written to the `data` folder. **Now go to Part 5.**
 
 ---
@@ -438,29 +469,59 @@ This prints a summary table directly, and saves raw data in the `data` folder.
 
 # Part 5 — Reading your results
 
-Run the analysis:
+## 5.1 Find your data file
+
+Your collection wrote a file into the `data` folder. List it:
+
+**Windows:** `dir data`  **macOS/Linux:** `ls data`
+
+You will see something like `zone-cps-20260101-120000.csv`. That is the file you
+just created — note the exact name.
+
+## 5.2 Run the analysis
+
+**Windows (Track A) — stay in PowerShell:**
 
 ```
-./stats.sh data/YOUR-FILE.csv COLUMN-NAME
+.\Stats.ps1 -Path data\zone-cps-20260101-120000.csv -Column tcp_true -Zone untrust
 ```
 
-Replace `YOUR-FILE.csv` with the file that was created. Not sure of the name?
-Run `ls data` to list the folder.
+Substitute your own file name and your own zone name.
+
+**macOS/Linux, or Windows Track B in Git Bash:**
+
+```
+./stats.sh data/zone-cps-20260101-120000.csv tcp_true
+```
+
+> **Which column?** For Track A, use `tcp_true`, `udp_true`, or `otherip_true` —
+> one at a time, because each maps to a different Zone Protection setting.
+> **Always the `_true` columns, never `_raw`** (see the doubling note in 3.5).
+> Forgotten the column names? Give a wrong one and the script prints the real
+> list.
+
+Both scripts produce identical output; use whichever suits the shell you are in.
 
 ## Try it right now on the example data
 
-The repo includes a synthetic sample so you can practise before using your own:
+A synthetic sample is included so you can practise before using your own numbers.
+
+**Windows (PowerShell):**
 
 ```
-gawk -F, 'NR==1{print "sessions";next} $2=="tcp-syn"{print $3}' \
-  data/example-baseline-per-second.csv > /tmp/tcp.csv
-./stats.sh /tmp/tcp.csv sessions
+.\Stats.ps1 -Path data\example-baseline-per-second.csv -Column sessions
 ```
 
-Output:
+**macOS/Linux/Git Bash:**
 
 ```
-samples : 8039
+./stats.sh data/example-baseline-per-second.csv sessions
+```
+
+Either way you should see:
+
+```
+samples : 9073
 mean    : 1.5
 p50     : 1
 p90     : 2
@@ -468,6 +529,12 @@ p95     : 3
 p99     : 5
 max     : 24
 ```
+
+## 5.3 Want to look at the raw numbers?
+
+The output files are ordinary CSVs. Double-click one to open it in Excel, Numbers,
+or LibreOffice. You do not have to — the analysis above gives you everything you
+need — but it can help to see the shape of your traffic.
 
 ## What these mean
 
@@ -646,7 +713,18 @@ The variable did not save, or you closed and reopened the terminal. Set it again
 On Mac/Linux, check for spaces around the `=` sign.
 
 **`awk: calling undefined function asort`**
-You have plain `awk`, not `gawk`. See Part 2.5.
+You have plain `awk`, not `gawk`. See Part 2.5. On Windows, use `.\Stats.ps1`
+instead — it needs neither `awk` nor `gawk`.
+
+**Windows: "The term 'Stats.ps1' is not recognized"**
+Type `.\Stats.ps1` with the leading `.\` — see the note in Part 2.2.
+
+**"No such file or directory" when running a script**
+You are not in the right folder. Run `cd PANW` and try again. See Part 2.2.
+
+**Windows Track A: Part 5 tells me to run a `.sh` script**
+It should not — use `.\Stats.ps1` instead. The `.sh` versions are for
+macOS, Linux, and Git Bash.
 
 ---
 
@@ -726,8 +804,9 @@ If both hold, prefer the recommendations. If either fails, use this toolkit.
 |---|---|---|
 | `snmpwalk.ps1` | A | Self-contained SNMPv2c client. No install needed. |
 | `zone-cps-snmp.ps1` | A | Per-zone CPS poller. Writes raw and halved columns. |
+| `Stats.ps1` | both | Analysis for PowerShell users. No bash or gawk needed. |
 | `zone-cps.sh` | B | Per-zone, per-protocol CPS from traffic logs. |
-| `stats.sh` | both | Distribution and threshold suggestions for any CSV column. |
+| `stats.sh` | both | Analysis for bash users. Same output as `Stats.ps1`. |
 | `pan-lib.sh` | B | Shared API helpers. Sourced by other scripts, not run directly. |
 | `discover.sh` | B | Dumps raw API output. For re-checking after a PAN-OS upgrade. |
 | `cps-poll.sh` | B | Device-wide (not per-zone) CPS sampler. |

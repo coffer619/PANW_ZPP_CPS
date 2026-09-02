@@ -105,10 +105,10 @@ of the three methods below works in your environment.
 
 ### Method 1 — Download a ZIP in your browser (works almost everywhere)
 
-1. Open <https://github.com/coffer619/PANW>
+1. Open <https://github.com/coffer619/PANW_ZPP_CPS>
 2. Click the green **Code** button
 3. Click **Download ZIP**
-4. Find the downloaded `PANW-main.zip`, right-click it, choose **Extract All**,
+4. Find the downloaded `PANW_ZPP_CPS-main.zip`, right-click it, choose **Extract All**,
    and note where you extracted it
 
 No account, no installation, no admin rights. This is the method to use if you
@@ -119,24 +119,24 @@ are unsure.
 **Windows PowerShell** — built into Windows, needs no admin rights:
 
 ```
-Invoke-WebRequest -Uri "https://github.com/coffer619/PANW/archive/refs/heads/main.zip" -OutFile "$HOME\PANW.zip"
-Expand-Archive "$HOME\PANW.zip" -DestinationPath $HOME -Force
-cd "$HOME\PANW-main"
+Invoke-WebRequest -Uri "https://github.com/coffer619/PANW_ZPP_CPS/archive/refs/heads/main.zip" -OutFile "$HOME\PANW_ZPP_CPS.zip"
+Expand-Archive "$HOME\PANW_ZPP_CPS.zip" -DestinationPath $HOME -Force
+cd "$HOME\PANW_ZPP_CPS-main"
 ```
 
 **macOS/Linux:**
 
 ```
-curl -L -o ~/PANW.zip https://github.com/coffer619/PANW/archive/refs/heads/main.zip
-unzip ~/PANW.zip -d ~
-cd ~/PANW-main
+curl -L -o ~/PANW_ZPP_CPS.zip https://github.com/coffer619/PANW_ZPP_CPS/archive/refs/heads/main.zip
+unzip ~/PANW_ZPP_CPS.zip -d ~
+cd ~/PANW_ZPP_CPS-main
 ```
 
 ### Method 3 — Git (only if you already have it)
 
 ```
-git clone https://github.com/coffer619/PANW.git
-cd PANW
+git clone https://github.com/coffer619/PANW_ZPP_CPS.git
+cd PANW_ZPP_CPS
 ```
 
 ### If GitHub itself is blocked by your organisation
@@ -157,10 +157,10 @@ an empty sub-folder named `data` beside them.
 
 | How you got the files | Folder name |
 |---|---|
-| ZIP download (Methods 1 or 2) | **`PANW-main`** |
-| Git clone (Method 3) | **`PANW`** |
+| ZIP download (Methods 1 or 2) | **`PANW_ZPP_CPS-main`** |
+| Git clone (Method 3) | **`PANW_ZPP_CPS`** |
 
-Wherever this guide says `cd PANW`, use whichever name you actually have.
+Wherever this guide says `cd PANW_ZPP_CPS`, use whichever name you actually have.
 
 > **Read this or you will get stuck later.** Every command in this guide must be
 > run *from inside that folder*. `cd` means "change directory" — it is how you
@@ -186,11 +186,10 @@ Wherever this guide says `cd PANW`, use whichever name you actually have.
 
 ## 2.3 Check what tools you have
 
-Run these three commands one at a time. You are just looking to see whether each
+Run these two commands one at a time. You are just looking to see whether each
 prints a version number or says "not found."
 
 ```
-git --version
 snmpwalk --version
 gawk --version
 ```
@@ -199,10 +198,15 @@ gawk --version
 
 | Tool | Track A | Track B | If missing |
 |---|---|---|---|
-| `git` | yes | yes | <https://git-scm.com/downloads> |
 | `snmpwalk` | see below | no | see 2.4 |
 | `gawk` | no | yes | see 2.5 |
 | `curl` | no | yes | Built into Windows 10+, macOS, and Linux |
+| `git` | **not needed** | **not needed** | Use Method 1 or 2 in 2.2 |
+
+> **Windows, Track A: nothing needs installing at all.** PowerShell ships with
+> Windows, and `snmpwalk.ps1`, `zone-cps-snmp.ps1`, and `Stats.ps1` are entirely
+> self-contained. No Git, no net-snmp, no gawk, no administrator rights. If your
+> machine is locked down, this is your path.
 
 **Windows users on Track A:** you do **not** need `snmpwalk`. This repo includes
 `snmpwalk.ps1`, a self-contained replacement that needs nothing installed. Skip 2.4.
@@ -777,15 +781,15 @@ Type `.\Stats.ps1` with the leading `.\` — see the note in Part 2.2.
 
 **"No such file or directory" when running a script**
 You are not in the right folder. Change into it and try again — and check the
-name: a ZIP download gives you `PANW-main`, a Git clone gives `PANW`. See Part 2.2.
+name: a ZIP download gives you `PANW_ZPP_CPS-main`, a Git clone gives `PANW_ZPP_CPS`. See Part 2.2.
 
 **I cannot install Git — no admin rights, or it is blocked**
 You do not need it. Use Method 1 or 2 in Part 2.2 instead. For Track A on
 Windows nothing at all needs installing: PowerShell is built in, and all three
 scripts are self-contained.
 
-**`cd PANW` says the folder does not exist**
-If you downloaded the ZIP, the folder is named `PANW-main`. Run `cd PANW-main`.
+**`cd PANW_ZPP_CPS` says the folder does not exist**
+If you downloaded the ZIP, the folder is named `PANW_ZPP_CPS-main`. Run `cd PANW_ZPP_CPS-main`.
 
 **Windows Track A: Part 5 tells me to run a `.sh` script**
 It should not — use `.\Stats.ps1` instead. The `.sh` versions are for

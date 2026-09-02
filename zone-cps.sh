@@ -60,7 +60,7 @@ BEGIN{ RS="<entry "; FS="\n" }
 }
 END{
   order["tcp-syn"]=1; order["udp"]=2; order["icmp"]=3; order["icmpv6"]=4; order["other-ip"]=5; order["ALL"]=6
-  printf "%-10s %8s %8s %8s %8s %8s   %s\n","bucket","secs","mean","p95","p99","PEAK","-> Alarm / Activate / Max"
+  printf "%-10s %8s %8s %8s %8s %8s   %s\n","bucket","seconds","mean","p95","p99","PEAK","-> Alarm / Activate / Max"
   printf "%s\n", "---------------------------------------------------------------------------------------"
   for (o=1; o<=6; o++) for (b in buckets) if (order[b]==o) {
     n=0; s=0; delete v
@@ -72,7 +72,9 @@ END{
            int(s/m*1.20)+1, int(pk*1.1)+1, int(pk*3)+1
   }
   print ""
-  print "secs = seconds that had at least one new session; mean/p95/PEAK are sessions-per-second."
+  print "seconds = how many one-second intervals contained at least one new connection."
+  print "          It is a count of SECONDS, not of connections."
+  print "mean/p95/PEAK = connections started per second, during those seconds."
   print "NOTE: this counts SESSIONS. The SYN-flood bucket counts SYN PACKETS, so treat"
   print "      tcp-syn PEAK as a FLOOR. Confirm with the alarm-rate walk-down (see notes)."
 }' "$RAW"

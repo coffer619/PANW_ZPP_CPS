@@ -100,28 +100,84 @@ Throughout this guide, "run this" means: click into the terminal window, type
 
 ## 2.2 Download these scripts
 
-Run this:
+**You do not need Git, a GitHub account, or administrator rights.** Pick whichever
+of the three methods below works in your environment.
+
+### Method 1 — Download a ZIP in your browser (works almost everywhere)
+
+1. Open <https://github.com/coffer619/PANW>
+2. Click the green **Code** button
+3. Click **Download ZIP**
+4. Find the downloaded `PANW-main.zip`, right-click it, choose **Extract All**,
+   and note where you extracted it
+
+No account, no installation, no admin rights. This is the method to use if you
+are unsure.
+
+### Method 2 — Download from the terminal (no browser, no Git)
+
+**Windows PowerShell** — built into Windows, needs no admin rights:
+
+```
+Invoke-WebRequest -Uri "https://github.com/coffer619/PANW/archive/refs/heads/main.zip" -OutFile "$HOME\PANW.zip"
+Expand-Archive "$HOME\PANW.zip" -DestinationPath $HOME -Force
+cd "$HOME\PANW-main"
+```
+
+**macOS/Linux:**
+
+```
+curl -L -o ~/PANW.zip https://github.com/coffer619/PANW/archive/refs/heads/main.zip
+unzip ~/PANW.zip -d ~
+cd ~/PANW-main
+```
+
+### Method 3 — Git (only if you already have it)
 
 ```
 git clone https://github.com/coffer619/PANW.git
 cd PANW
 ```
 
-If you get `git: command not found`, install Git first from
-<https://git-scm.com/downloads>, then close and reopen your terminal and try again.
+### If GitHub itself is blocked by your organisation
 
-This downloads the files into a folder named `PANW` inside whatever folder your
-terminal was in, and the `cd PANW` moves you into it. (`cd` means "change
-directory" — it is how you move between folders in a terminal.)
+The scripts are small plain-text files and nothing here depends on GitHub. Any of
+these works:
+
+- Have a colleague who *can* reach it download the ZIP and pass it to you
+- Download it on a personal device and transfer via USB
+- Open each file on GitHub, click **Raw**, and copy-paste the contents into a text
+  editor, saving with the exact same filenames into one folder
+
+For Track A on Windows you only need three files: `snmpwalk.ps1`,
+`zone-cps-snmp.ps1`, and `Stats.ps1`. Save them together in one folder and create
+an empty sub-folder named `data` beside them.
+
+### Important: your folder name depends on the method
+
+| How you got the files | Folder name |
+|---|---|
+| ZIP download (Methods 1 or 2) | **`PANW-main`** |
+| Git clone (Method 3) | **`PANW`** |
+
+Wherever this guide says `cd PANW`, use whichever name you actually have.
 
 > **Read this or you will get stuck later.** Every command in this guide must be
-> run *from inside that folder*. If you close the terminal and open a new one,
-> you land back in your home folder and commands will fail with "not
-> recognized" or "no such file." Run `cd PANW` again each time you open a new
-> terminal.
+> run *from inside that folder*. `cd` means "change directory" — it is how you
+> move between folders in a terminal. If you close the terminal and open a new
+> one, you land back in your home folder and commands fail with "not recognized"
+> or "no such file." Change back into the folder each time you open a terminal.
 >
 > Lost? Run `cd` with no arguments on Windows to see where you are (`pwd` on
 > macOS/Linux).
+
+> **Windows: if you get a security warning running a script**, the files were
+> flagged because they came from the internet. Fix it without admin rights by
+> running this once, from inside the folder:
+>
+> ```
+> Get-ChildItem *.ps1 | Unblock-File
+> ```
 
 > **Windows only — why commands start with `.\`** In PowerShell you must type
 > `.\Stats.ps1`, not `Stats.ps1`. The `.\` means "in this folder." Leaving it off
@@ -720,7 +776,16 @@ instead — it needs neither `awk` nor `gawk`.
 Type `.\Stats.ps1` with the leading `.\` — see the note in Part 2.2.
 
 **"No such file or directory" when running a script**
-You are not in the right folder. Run `cd PANW` and try again. See Part 2.2.
+You are not in the right folder. Change into it and try again — and check the
+name: a ZIP download gives you `PANW-main`, a Git clone gives `PANW`. See Part 2.2.
+
+**I cannot install Git — no admin rights, or it is blocked**
+You do not need it. Use Method 1 or 2 in Part 2.2 instead. For Track A on
+Windows nothing at all needs installing: PowerShell is built in, and all three
+scripts are self-contained.
+
+**`cd PANW` says the folder does not exist**
+If you downloaded the ZIP, the folder is named `PANW-main`. Run `cd PANW-main`.
 
 **Windows Track A: Part 5 tells me to run a `.sh` script**
 It should not — use `.\Stats.ps1` instead. The `.sh` versions are for
@@ -823,9 +888,17 @@ firewall. Per-second connection counts by protocol over 12 hours, 13,495
 connections, columns `second,bucket,sessions`. Generated, not captured — it
 contains no traffic from any real network.
 
-| bucket | active secs | mean | peak |
+| bucket | seconds with traffic | mean | peak |
 |---|---|---|---|
 | tcp-syn | 8039 | 1.5 | 24 |
 | udp | 907 | 1.6 | 11 |
 | icmp | 113 | 1.3 | 3 |
 | other-ip | 14 | 1.0 | 1 |
+
+**"seconds with traffic" is a count of seconds, not of connections.** Out of the
+43,200 seconds in the 12-hour window, 8,039 of them contained at least one new
+TCP connection; the other ~35,000 seconds had none. `mean` and `peak` are then
+connections-per-second measured across those active seconds only.
+
+So the tcp-syn row reads: *"in 8,039 separate seconds there was TCP activity;
+typically 1.5 connections in each such second; the busiest single second had 24."*

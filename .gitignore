@@ -1,0 +1,18 @@
+# ---------------------------------------------------------------------------
+# Raw traffic-log exports from zone-cps.sh.
+#
+# These contain <src>, <dst>, <serial>, <device_name> and <rule> for EVERY
+# session in the window - real addresses off your network. Never commit them.
+# ---------------------------------------------------------------------------
+data/*.xml
+
+# Baseline CSVs generated from your own environment. The one exception is the
+# checked-in example, which is synthetic - generated, not captured from a network.
+data/*.csv
+!data/example-baseline-per-second.csv
+
+# Credentials - PAN_KEY, PAN_USER/PAN_PASS, SNMP community strings.
+.env
+*.env
+*.key
+secrets*
